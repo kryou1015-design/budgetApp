@@ -22,6 +22,11 @@ def add_transaction(
     return [*transactions, stored_transaction]
 
 
+def get_balance(transactions: list[Transaction]) -> float:
+    """Return the sum of income and expense transaction amounts."""
+    return float(sum(transaction["amount"] for transaction in transactions))
+
+
 def calculate_balance(transactions: list[Transaction]) -> int:
     """Return the current balance from income and expense transactions."""
     pass
