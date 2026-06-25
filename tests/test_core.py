@@ -1,10 +1,18 @@
 import csv
 from pathlib import Path
 
-from budget.core import add_transaction, get_balance
+from budget.core import add_transaction, filter_by_category, get_balance
 
 
 STEP2_TRANSACTIONS = Path("data/step2_transactions.csv")
+
+
+def load_step2_transactions() -> list[dict[str, object]]:
+    with STEP2_TRANSACTIONS.open(encoding="utf-8", newline="") as csv_file:
+        return [
+            {**row, "amount": int(row["amount"])}
+            for row in csv.DictReader(csv_file)
+        ]
 
 
 def test_add_transaction_increases_length() -> None:
@@ -99,10 +107,33 @@ def test_get_balance_sums_income_and_expense_amounts() -> None:
 
 
 def test_get_balance_matches_step2_transaction_total() -> None:
-    with STEP2_TRANSACTIONS.open(encoding="utf-8", newline="") as csv_file:
-        transactions = [
-            {**row, "amount": int(row["amount"])}
-            for row in csv.DictReader(csv_file)
-        ]
+    assert get_balance(load_step2_transactions()) == 24285027.0
 
-    assert get_balance(transactions) == 24285027.0
+
+def test_filter_by_category_matches_step2_case_insensitively() -> None:
+    transactions = load_step2_transactions()
+
+    filtered_transactions = filter_by_category(transactions, "여행")
+
+    assert len(filtered_transactions) == 6
+    assert all(
+        transaction["category"].casefold() == "여행".casefold()
+        for transaction in filtered_transactions
+    )
+
+
+def test_filter_by_category_returns_empty_list_for_missing_category() -> None:
+    transactions = load_step2_transactions()
+
+    filtered_transactions = filter_by_category(transactions, "없는카테고리")
+
+    assert filtered_transactions == []
+
+
+def test_filter_by_category_returns_independent_results() -> None:
+    transactions = load_step2_transactions()
+
+    filtered_transactions = filter_by_category(transactions, "여행")
+    filtered_transactions[0]["description"] = "변경된 설명"
+
+    assert transactions[0]["description"] == "항공권"

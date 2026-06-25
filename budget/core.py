@@ -27,6 +27,19 @@ def get_balance(transactions: list[Transaction]) -> float:
     return float(sum(transaction["amount"] for transaction in transactions))
 
 
+def filter_by_category(
+    transactions: list[Transaction],
+    category: str,
+) -> list[Transaction]:
+    """Return transactions matching a category without case sensitivity."""
+    target_category = category.casefold()
+    return [
+        transaction.copy()
+        for transaction in transactions
+        if str(transaction["category"]).casefold() == target_category
+    ]
+
+
 def calculate_balance(transactions: list[Transaction]) -> int:
     """Return the current balance from income and expense transactions."""
     pass
