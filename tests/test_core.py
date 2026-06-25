@@ -1,4 +1,3 @@
-import csv
 from pathlib import Path
 
 from budget.core import (
@@ -6,6 +5,7 @@ from budget.core import (
     filter_by_category,
     get_balance,
     load_transactions_from_csv,
+    monthly_summary,
 )
 
 
@@ -14,11 +14,7 @@ STEP2_TRANSACTIONS = Path("data/step2_transactions.csv")
 
 
 def load_step2_transactions() -> list[dict[str, object]]:
-    with STEP2_TRANSACTIONS.open(encoding="utf-8", newline="") as csv_file:
-        return [
-            {**row, "amount": int(row["amount"])}
-            for row in csv.DictReader(csv_file)
-        ]
+    return load_transactions_from_csv(STEP2_TRANSACTIONS)
 
 
 def test_add_transaction_increases_length() -> None:
@@ -164,3 +160,29 @@ def test_load_transactions_from_csv_converts_amount_to_int() -> None:
 
     assert isinstance(transactions[0]["amount"], int)
     assert transactions[1]["amount"] == 3500000
+
+
+def test_monthly_summary_returns_empty_dict_for_empty_transactions() -> None:
+    assert monthly_summary([]) == {}
+
+
+def test_monthly_summary_groups_income_expense_and_net_by_month() -> None:
+    transactions = load_step2_transactions()
+
+    assert monthly_summary(transactions) == {
+        "2026-01": {
+            "income": 135541,
+            "expense": -3608605,
+            "net": -3473064,
+        },
+        "2026-02": {
+            "income": 15871780,
+            "expense": -3333340,
+            "net": 12538440,
+        },
+        "2026-03": {
+            "income": 17239079,
+            "expense": -2019428,
+            "net": 15219651,
+        },
+    }

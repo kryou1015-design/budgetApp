@@ -6,6 +6,7 @@ from typing import Any
 
 
 Transaction = dict[str, Any]
+MonthlySummary = dict[str, dict[str, int]]
 
 
 def load_transactions_from_csv(file_path: str | Path) -> list[Transaction]:
@@ -49,6 +50,22 @@ def filter_by_category(
         for transaction in transactions
         if str(transaction["category"]).casefold() == target_category
     ]
+
+
+def monthly_summary(transactions: list[Transaction]) -> MonthlySummary:
+    """Return income, expense, and net totals grouped by transaction month."""
+    summary: MonthlySummary = {}
+    for transaction in transactions:
+        month = str(transaction["date"])[:7]
+        amount = int(transaction["amount"])
+        if month not in summary:
+            summary[month] = {"income": 0, "expense": 0, "net": 0}
+        if amount >= 0:
+            summary[month]["income"] += amount
+        else:
+            summary[month]["expense"] += amount
+        summary[month]["net"] += amount
+    return summary
 
 
 def calculate_balance(transactions: list[Transaction]) -> int:
