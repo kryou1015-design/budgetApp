@@ -11,7 +11,15 @@ def add_transaction(
     transaction: Transaction,
 ) -> list[Transaction]:
     """Return a transaction list with the new transaction added."""
-    pass
+    stored_transaction: Transaction = {
+        "date": transaction["date"],
+        "type": transaction["type"],
+        "category": transaction["category"],
+        "description": transaction["description"],
+        "amount": transaction["amount"],
+        "memo": transaction["memo"],
+    }
+    return [*transactions, stored_transaction]
 
 
 def calculate_balance(transactions: list[Transaction]) -> int:
