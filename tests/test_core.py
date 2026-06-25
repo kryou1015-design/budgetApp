@@ -1,9 +1,15 @@
 import csv
 from pathlib import Path
 
-from budget.core import add_transaction, filter_by_category, get_balance
+from budget.core import (
+    add_transaction,
+    filter_by_category,
+    get_balance,
+    load_transactions_from_csv,
+)
 
 
+STEP1_TRANSACTIONS = Path("data/step1_transactions.csv")
 STEP2_TRANSACTIONS = Path("data/step2_transactions.csv")
 
 
@@ -137,3 +143,24 @@ def test_filter_by_category_returns_independent_results() -> None:
     filtered_transactions[0]["description"] = "변경된 설명"
 
     assert transactions[0]["description"] == "항공권"
+
+
+def test_load_transactions_from_csv_reads_step1_transactions() -> None:
+    transactions = load_transactions_from_csv(STEP1_TRANSACTIONS)
+
+    assert len(transactions) == 10
+    assert transactions[0] == {
+        "date": "2026-01-05",
+        "type": "지출",
+        "category": "식비",
+        "description": "점심식사",
+        "amount": -12000,
+        "memo": "",
+    }
+
+
+def test_load_transactions_from_csv_converts_amount_to_int() -> None:
+    transactions = load_transactions_from_csv(STEP1_TRANSACTIONS)
+
+    assert isinstance(transactions[0]["amount"], int)
+    assert transactions[1]["amount"] == 3500000

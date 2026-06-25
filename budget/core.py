@@ -1,9 +1,20 @@
 """Core budget transaction operations."""
 
+import csv
+from pathlib import Path
 from typing import Any
 
 
 Transaction = dict[str, Any]
+
+
+def load_transactions_from_csv(file_path: str | Path) -> list[Transaction]:
+    """Read transaction dictionaries from a UTF-8 BOM-compatible CSV file."""
+    with Path(file_path).open(encoding="utf-8-sig", newline="") as csv_file:
+        return [
+            {**row, "amount": int(row["amount"])}
+            for row in csv.DictReader(csv_file)
+        ]
 
 
 def add_transaction(
